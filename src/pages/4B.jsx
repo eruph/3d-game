@@ -1,13 +1,14 @@
-import Scene from "../components/Scene";
-import React from "react";
 import { Canvas } from "@react-three/fiber";
-const Main = () => {
+import React from "react";
+import Scene from "../components/4B/Scene";
+const Main4B = () => {
   return (
     <div className="bg-black h-screen w-screen">
-      <Canvas>
+      <Canvas shadows>
         <Scene />
       </Canvas>
     </div>
   );
 };
-export default Main;
+
+export default Main4B;

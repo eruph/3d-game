@@ -1,12 +1,17 @@
+import { Link } from "react-router-dom";
 const Navigate = () => {
   return (
-    <nav className="bg-black h-screen flex items-start justify-center">
-      <a
-        href="/Main"
-        className="bg-white text-teal-500 text-2xl p-3  m-3 rounded-lg transition-colors hover:bg-sky-700 duration-500"
-      >
-        Здесь будет находиться страница для 3D моделей
-      </a>
+    <nav className="bg-black h-screen w-screen flex items-center justify-center flex-col">
+      <Link to="/4.A">
+        <button className="glow-on-hover" type="button">
+          4 A
+        </button>
+      </Link>
+      <Link to="/4.B">
+        <button className="glow-on-hover" type="button">
+          4 B
+        </button>
+      </Link>
     </nav>
   );
 };
