@@ -20,7 +20,7 @@ const Main5B = () => {
     );
   }
   return (
-    <div className="h-screen w-screen bg-black">
+    <div className="h-screen w-screen ">
       <Canvas>
         <Scene />
       </Canvas>
