@@ -12,7 +12,7 @@ const Scene = () => {
       <PerspectiveCamera
         ref={camera}
         makeDefault
-        position={[5, 0, 10]}
+        position={[3, 0, 10]}
         fov={75}
       />
       <OrbitControls camera={camera.current} />
