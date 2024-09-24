@@ -1,4 +1,4 @@
-const Circle = () => {
+const Sphere = () => {
   return (
     <mesh position={[5, 1, 0]}>
       <sphereGeometry args={[1, 32, 32]} />
@@ -7,4 +7,4 @@ const Circle = () => {
   );
 };
 
-export default Circle;
+export default Sphere;
