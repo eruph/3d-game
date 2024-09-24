@@ -1,9 +1,7 @@
-import { ColladaLoader, OBJLoader } from "three/examples/jsm/Addons.js";
+import { ColladaLoader } from "three/examples/jsm/Addons.js";
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useLoader } from "@react-three/fiber";
 const Model = ({ url }) => {
-  const loader1 = useLoader(OBJLoader, url);
   const meshRef = useRef();
 
   useEffect(() => {
@@ -21,7 +19,7 @@ const Model = ({ url }) => {
     }
   });
 
-  return <primitive object={loader1} />;
+  return <group ref={meshRef} />;
 };
 
 export default Model;

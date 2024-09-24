@@ -17,7 +17,7 @@ const Scene = () => {
       />
       <OrbitControls camera={camera.current} />
 
-      <Model position={[0, 0, 0]} url="/Muhammer.obj" />
+      <Model position={[0, 0, 0]} url="/dae/Lowpoly_Notebook_2.dae" />
     </>
   );
 };
