@@ -12,9 +12,14 @@ const Navigate = () => {
           4 B
         </button>
       </Link>
-      <Link to="/5.B">
+      <Link to="/5.A">
         <button className="glow-on-hover" type="button">
           5 A
+        </button>
+      </Link>
+      <Link to="/5.B">
+        <button className="glow-on-hover" type="button">
+          5 B
         </button>
       </Link>
     </nav>

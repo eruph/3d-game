@@ -12,16 +12,12 @@ const Scene = () => {
       <PerspectiveCamera
         ref={camera}
         makeDefault
-        position={[15, 20, 15]}
+        position={[5, 0, 10]}
         fov={75}
       />
       <OrbitControls camera={camera.current} />
 
-      <Model
-        url="/dlmodel.obj"
-        rotationx={Math.PI / 2}
-        rotationy={Math.PI / 2}
-      />
+      <Model position={[0, 0, 0]} url="/Male.obj" />
     </>
   );
 };
