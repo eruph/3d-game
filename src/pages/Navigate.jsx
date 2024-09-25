@@ -22,6 +22,11 @@ const Navigate = () => {
           5 B
         </button>
       </Link>
+      <Link to="/6.A">
+        <button className="glow-on-hover" type="button">
+          6 A
+        </button>
+      </Link>
     </nav>
   );
 };
