@@ -57,22 +57,25 @@ const Model = ({ url }) => {
         case "w":
         case "W":
         case "ц":
-      case "Ц":
+        case "Ц":
           setMoveBackward(true);
-
           break;
         case "s":
         case "S":
+        case "ы":
+        case "Ы":
           setMoveForward(true);
-
           break;
         case "a":
         case "A":
+        case "ф":
+        case "Ф":
           setMoveRight(true);
-
           break;
         case "d":
         case "D":
+        case "в":
+        case "В":
           setMoveLeft(true);
 
           break;
