@@ -98,25 +98,25 @@ const Model = ({ url }) => {
         case "Ц":
           setMoveBackward(false);
 
-          break;
-          case "s":
-            case "S":
-            case "ы":
-            case "Ы":
+        break;
+        case "s":
+        case "S":
+        case "ы":
+        case "Ы":
           setMoveForward(false);
 
-          break;
-          case "a":
-            case "A":
-            case "ф":
-            case "Ф":
+        break;
+        case "a":
+        case "A":
+        case "ф":
+        case "Ф":
           setMoveRight(false);
 
-          break;
-          case "d":
-            case "D":
-            case "в":
-            case "В":
+        break;
+        case "d":
+        case "D":
+        case "в":
+        case "В":
           setMoveLeft(false);
 
           break;
