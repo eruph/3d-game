@@ -30,7 +30,7 @@ const Model = ({ url }) => {
   const [isJumping, setIsJumping] = useState(false);
   const [jumpVelocity, setJumpVelocity] = useState(0);
 
-  const speed = 0.1;
+  const speed = 0.15;
   const jumpHeight = 0.9;
   const gravity = -0.041;
 
