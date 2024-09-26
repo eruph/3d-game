@@ -56,6 +56,8 @@ const Model = ({ url }) => {
       switch (event.key) {
         case "w":
         case "W":
+        case "ц":
+      case "Ц":
           setMoveBackward(true);
 
           break;
