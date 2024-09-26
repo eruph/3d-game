@@ -94,21 +94,29 @@ const Model = ({ url }) => {
       switch (event.key) {
         case "w":
         case "W":
+        case "ц":
+        case "Ц":
           setMoveBackward(false);
 
           break;
-        case "s":
-        case "S":
+          case "s":
+            case "S":
+            case "ы":
+            case "Ы":
           setMoveForward(false);
 
           break;
-        case "a":
-        case "A":
+          case "a":
+            case "A":
+            case "ф":
+            case "Ф":
           setMoveRight(false);
 
           break;
-        case "d":
-        case "D":
+          case "d":
+            case "D":
+            case "в":
+            case "В":
           setMoveLeft(false);
 
           break;
