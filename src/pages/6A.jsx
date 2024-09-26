@@ -1,6 +1,9 @@
 import { Canvas } from "@react-three/fiber";
 import React, { useState, useEffect } from "react";
 import Scene from "../components/6A/Scene";
+import { Leva } from "leva";
+import { Stats } from "@react-three/drei";
+import { Suspense } from "react";
 const Main6A = () => {
   const [loading, setLoading] = useState(true);
 
@@ -21,9 +24,13 @@ const Main6A = () => {
   }
   return (
     <div className="h-screen w-screen bg-black ">
-      <Canvas>
-        <Scene />
-      </Canvas>
+      <Suspense fallback={null}>
+        <Canvas>
+          <Scene />
+          <Stats />
+        </Canvas>
+        <Leva collapsed />
+      </Suspense>
     </div>
   );
 };

@@ -6,15 +6,11 @@ import { Physics } from "@react-three/cannon";
 const Scene = () => {
   const camera = useRef();
   const modelRef = useRef();
+
   return (
     <>
       <ambientLight intensity={0.5} />
-      <perspectiveCamera
-        ref={camera}
-        position={[0, 2, 5]}
-        fov={75}
-        makeDefault
-      />
+
       <directionalLight position={[5, 5, 5]} />
       <OrbitControls camera={camera.current} />
       <gridHelper args={[1000, 50, "green", "green"]} />

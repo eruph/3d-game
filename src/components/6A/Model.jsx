@@ -5,11 +5,19 @@ import { useFrame } from "@react-three/fiber";
 import { useAnimations } from "@react-three/drei";
 import { useBox, usePlane } from "@react-three/cannon";
 import CameraController from "./CameraController";
+import { useControls } from "leva";
+
 const Model = ({ url }) => {
   const modelRef = useRef();
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, modelRef);
 
+  const { speed, jumpHeight, gravity } = useControls({
+    speed: { value: 0.15, min: 0, max: 15 },
+    jumpHeight: { value: 0.9, min: 0, max: 100 },
+    gravity: { value: -0.041, min: -1, max: 1 },
+  });
+  const animationSpeed = 0.5;
   const [boxRef] = useBox(() => ({
     mass: 1,
     position: [0, 0, 0],
@@ -30,11 +38,6 @@ const Model = ({ url }) => {
   const [isJumping, setIsJumping] = useState(false);
   const [jumpVelocity, setJumpVelocity] = useState(0);
 
-  const speed = 0.15;
-  const jumpHeight = 0.9;
-  const gravity = -0.041;
-
-  const animationSpeed = 0.2;
   useEffect(() => {
     if (actions) {
       actions["Dance"].play();
@@ -98,21 +101,21 @@ const Model = ({ url }) => {
         case "Ц":
           setMoveBackward(false);
 
-        break;
+          break;
         case "s":
         case "S":
         case "ы":
         case "Ы":
           setMoveForward(false);
 
-        break;
+          break;
         case "a":
         case "A":
         case "ф":
         case "Ф":
           setMoveRight(false);
 
-        break;
+          break;
         case "d":
         case "D":
         case "в":
