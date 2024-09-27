@@ -11,8 +11,9 @@ const Model = ({ url }) => {
   const modelRef = useRef();
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, modelRef);
-
-
+  const [addZ, setAddZ] = useState(25);
+  const [addX, setAddX] = useState(0);
+ 
   const { speed, jumpHeight, gravity } = useControls({
     speed: { value: 0.15, min: 0, max: 15 },
     jumpHeight: { value: 0.9, min: 0, max: 100 },
@@ -62,26 +63,37 @@ const Model = ({ url }) => {
         case "W":
         case "ц":
         case "Ц":
+          scene.rotation.y = Math.PI * 2;
+          setAddZ(25);
+          setAddX(0);
           setMoveBackward(true);
           break;
         case "s":
         case "S":
         case "ы":
         case "Ы":
+          scene.rotation.y = Math.PI;
+          setAddZ(-25);
+          setAddX(0)
           setMoveForward(true);
           break;
         case "a":
         case "A":
         case "ф":
         case "Ф":
+          scene.rotation.y = Math.PI / 2;
+          setAddX(-20)
+          setAddZ(0)
           setMoveRight(true);
           break;
         case "d":
         case "D":
         case "в":
         case "В":
+          scene.rotation.y = Math.PI * 3 / 2;
+          setAddX(20)
+          setAddZ(0)
           setMoveLeft(true);
-
           break;
         case " ":
           if (!isJumping) {
@@ -114,6 +126,7 @@ const Model = ({ url }) => {
         case "A":
         case "ф":
         case "Ф":
+
           setMoveRight(false);
 
           break;
@@ -126,6 +139,7 @@ const Model = ({ url }) => {
           break;
         case " ":
           break;
+
         default:
           break;
       }
@@ -170,7 +184,7 @@ const Model = ({ url }) => {
 
   return (
     <>
-      <CameraController modelRef={modelRef} />
+      <CameraController modelRef={modelRef} addZ={addZ} addX={addX}/>
       <primitive ref={modelRef} object={scene} scale={1.5} />
     </>
   );
