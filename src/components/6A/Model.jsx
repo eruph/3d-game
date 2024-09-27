@@ -12,6 +12,8 @@ const Model = ({ url }) => {
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, modelRef);
 
+  scene.position.rotation.x = Math.PI;
+
   const { speed, jumpHeight, gravity } = useControls({
     speed: { value: 0.15, min: 0, max: 15 },
     jumpHeight: { value: 0.9, min: 0, max: 100 },
