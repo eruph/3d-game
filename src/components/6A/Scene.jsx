@@ -3,7 +3,7 @@ import { OrbitControls } from "@react-three/drei";
 import Model from "./Model";
 import Box from "./Box";
 import { Physics } from "@react-three/cannon";
-import { AxesHelper } from "three";
+import Plane from "./Plane";
 const Scene = () => {
   const camera = useRef();
   const modelRef = useRef();
@@ -14,12 +14,11 @@ const Scene = () => {
 
       <directionalLight position={[5, 5, 5]} />
       <OrbitControls camera={camera.current} />
-      <axesHelper args={[50]}/>
       <gridHelper args={[1000, 50, "green", "green"]} />
       <Physics>
+        <Plane />
         <Model url="/models/robot.glb" modelRef={modelRef} />
-        <Box position={3} />
-        <Box position={-3} />
+        <Box />
       </Physics>
     </>
   );
