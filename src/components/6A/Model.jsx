@@ -13,7 +13,7 @@ const Model = ({ url }) => {
   const { actions } = useAnimations(animations, modelRef);
   const [addZ, setAddZ] = useState(25);
   const [addX, setAddX] = useState(0);
- 
+
   const { speed, jumpHeight, gravity } = useControls({
     speed: { value: 0.15, min: 0, max: 15 },
     jumpHeight: { value: 0.9, min: 0, max: 100 },
@@ -34,6 +34,7 @@ const Model = ({ url }) => {
   }));
 
   const [moveForward, setMoveForward] = useState(false);
+  const [moveForwardLeft, setMoveForwardLeft] = useState(false);
   const [moveBackward, setMoveBackward] = useState(false);
   const [moveLeft, setMoveLeft] = useState(false);
   const [moveRight, setMoveRight] = useState(false);
@@ -43,7 +44,13 @@ const Model = ({ url }) => {
   useEffect(() => {
     if (actions) {
       actions["Dance"].play();
-      if (moveForward || moveBackward || moveLeft || moveRight) {
+      if (
+        moveForward ||
+        moveBackward ||
+        moveLeft ||
+        moveRight ||
+        moveForwardLeft
+      ) {
         actions["Running"].play();
       } else {
         actions["Running"].stop();
@@ -55,45 +62,33 @@ const Model = ({ url }) => {
         actions["Jump"].stop();
       }
     }
-  }, [actions, moveForward, moveBackward, moveLeft, moveRight, isJumping]);
+  }, [
+    actions,
+    moveForward,
+    moveBackward,
+    moveLeft,
+    moveRight,
+    isJumping,
+    moveForwardLeft,
+  ]);
   useEffect(() => {
     const handleKeyDown = (event) => {
-      switch (event.key) {
+      switch (event.key.toLowerCase()) {
         case "w":
-        case "W":
         case "ц":
-        case "Ц":
-          scene.rotation.y = Math.PI * 2;
-          setAddZ(25);
-          setAddX(0);
-          setMoveBackward(true);
-          break;
-        case "s":
-        case "S":
-        case "ы":
-        case "Ы":
-          scene.rotation.y = Math.PI;
-          setAddZ(-25);
-          setAddX(0)
           setMoveForward(true);
           break;
+        case "s":
+        case "ы":
+          setMoveBackward(true);
+          break;
         case "a":
-        case "A":
         case "ф":
-        case "Ф":
-          scene.rotation.y = Math.PI / 2;
-          setAddX(-20)
-          setAddZ(0)
-          setMoveRight(true);
+          setMoveLeft(true);
           break;
         case "d":
-        case "D":
         case "в":
-        case "В":
-          scene.rotation.y = Math.PI * 3 / 2;
-          setAddX(20)
-          setAddZ(0)
-          setMoveLeft(true);
+          setMoveRight(true);
           break;
         case " ":
           if (!isJumping) {
@@ -107,39 +102,23 @@ const Model = ({ url }) => {
     };
 
     const handleKeyUp = (event) => {
-      switch (event.key) {
+      switch (event.key.toLowerCase()) {
         case "w":
-        case "W":
         case "ц":
-        case "Ц":
-          setMoveBackward(false);
-
+          setMoveForward(false);
           break;
         case "s":
-        case "S":
         case "ы":
-        case "Ы":
-          setMoveForward(false);
-
+          setMoveBackward(false);
           break;
         case "a":
-        case "A":
         case "ф":
-        case "Ф":
-
-          setMoveRight(false);
-
+          setMoveLeft(false);
           break;
         case "d":
-        case "D":
         case "в":
-        case "В":
-          setMoveLeft(false);
-
+          setMoveRight(false);
           break;
-        case " ":
-          break;
-
         default:
           break;
       }
@@ -158,19 +137,38 @@ const Model = ({ url }) => {
     if (!modelRef.current) return;
 
     const model = modelRef.current;
+    const movementSpeed = (speed * Math.sqrt(2)) / 2; // Adjust for diagonal speed normalization
 
-    if (moveForward) {
-      model.position.z -= speed; // Вперёд
+    if (moveForward && moveLeft) {
+      model.position.z += movementSpeed; // Diagonal forward-left (reversed)
+      model.position.x += movementSpeed;
+      scene.rotation.y = Math.PI / 4;
+    } else if (moveForward && moveRight) {
+      model.position.z += movementSpeed; // Diagonal forward-right (reversed)
+      model.position.x -= movementSpeed;
+      scene.rotation.y = (Math.PI * 7) / 4;
+    } else if (moveBackward && moveLeft) {
+      model.position.z -= movementSpeed; // Diagonal backward-left (reversed)
+      model.position.x += movementSpeed;
+      scene.rotation.y = (Math.PI * 3) / 4;
+    } else if (moveBackward && moveRight) {
+      model.position.z -= movementSpeed; // Diagonal backward-right (reversed)
+      model.position.x -= movementSpeed;
+      scene.rotation.y = (Math.PI * 5) / 4;
+    } else if (moveBackward) {
+      model.position.z -= speed; // Move backward (reversed to forward)
+      scene.rotation.y = Math.PI;
+    } else if (moveForward) {
+      model.position.z += speed; // Move forward (reversed to backward)
+      scene.rotation.y = Math.PI * 2;
+    } else if (moveRight) {
+      model.position.x -= speed; // Move right (reversed to left)
+      scene.rotation.y = (Math.PI * 3) / 2;
+    } else if (moveLeft) {
+      model.position.x += speed; // Move left (reversed to right)
+      scene.rotation.y = Math.PI / 2;
     }
-    if (moveBackward) {
-      model.position.z += speed; // Назад
-    }
-    if (moveLeft) {
-      model.position.x -= speed; // Влево
-    }
-    if (moveRight) {
-      model.position.x += speed; // Вправо
-    }
+
     if (isJumping) {
       model.position.y += jumpVelocity;
       setJumpVelocity((prev) => prev + gravity);
@@ -184,7 +182,7 @@ const Model = ({ url }) => {
 
   return (
     <>
-      <CameraController modelRef={modelRef} addZ={addZ} addX={addX}/>
+      <CameraController modelRef={modelRef} addZ={addZ} addX={addX} />
       <primitive ref={modelRef} object={scene} scale={1.5} />
     </>
   );

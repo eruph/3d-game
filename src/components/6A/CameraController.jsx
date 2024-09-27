@@ -1,7 +1,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
 
-const CameraController = ({ modelRef, addZ, addX}) => {
+const CameraController = ({ modelRef, addZ, addX }) => {
   const { camera } = useThree();
 
   useFrame(() => {
