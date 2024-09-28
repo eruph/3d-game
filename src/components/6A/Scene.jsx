@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { OrbitControls } from "@react-three/drei";
 import Model from "./Model";
 import Box from "./Box";
-import { Physics } from "@react-three/cannon";
+import { Physics, Debug } from "@react-three/cannon";
 import Plane from "./Plane";
 const Scene = () => {
   const camera = useRef();
@@ -16,9 +16,11 @@ const Scene = () => {
       <OrbitControls camera={camera.current} />
       <gridHelper args={[1000, 50, "green", "green"]} />
       <Physics>
-        <Plane />
-        <Model url="/models/robot.glb" modelRef={modelRef} />
-        <Box />
+        <Debug color="red">
+          <Plane />
+          <Model url="/models/robot.glb" modelRef={modelRef} />
+          <Box />
+        </Debug>
       </Physics>
     </>
   );

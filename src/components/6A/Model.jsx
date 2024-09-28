@@ -1,6 +1,5 @@
-import { useRef } from "react";
 import { useGLTF } from "@react-three/drei";
-import { useState, useEffect } from "react";
+import { useRef ,useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useAnimations } from "@react-three/drei";
 import { useBox, usePlane } from "@react-three/cannon";
@@ -16,8 +15,8 @@ const Model = ({ url }) => {
 
   const [ref, api] = useBox(() => ({
     mass: 2,
-    position: [0, 1, 0],
-    args: [2, 2, 2],
+    position: [0, 0, 0],
+    args: [2, 5, 2],
     material: {
       friction: 1,
       restitution: 0.1,
@@ -34,46 +33,50 @@ const Model = ({ url }) => {
   const animationSpeed = 0.5;
 
   const [moveForward, setMoveForward] = useState(false);
-  const [moveForwardLeft, setMoveForwardLeft] = useState(false);
   const [moveBackward, setMoveBackward] = useState(false);
   const [moveLeft, setMoveLeft] = useState(false);
   const [moveRight, setMoveRight] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
+  const [punch, setPunch] = useState(false);
   const [jumpVelocity, setJumpVelocity] = useState(0);
+
 
   useEffect(() => {
     if (actions) {
-      actions["Dance"].play();
-      if (
-        moveForward ||
-        moveBackward ||
-        moveLeft ||
-        moveRight ||
-        moveForwardLeft
-      ) {
-        actions["Running"].play();
-      } else {
-        actions["Running"].stop();
-      }
-      if (isJumping) {
-        actions["Jump"].play();
-        actions["Jump"].timeScale = animationSpeed;
-      } else {
-        actions["Jump"].stop();
-      }
+      if (!actions) return;
+
+  if (punch && !actions["Punch"].isRunning()) {
+    actions["Punch"].play();
+  } else if (!punch && actions["Punch"].isRunning()) {
+    actions["Punch"].stop();
+  }
+
+  if ((moveForward || moveBackward || moveLeft || moveRight) && !actions["Running"].isRunning()) {
+    actions["Running"].play();
+  } else if (!(moveForward || moveBackward || moveLeft || moveRight) && actions["Running"].isRunning()) {
+    actions["Running"].stop();
+  }
+
+  if (isJumping && !actions["Jump"].isRunning()) {
+    actions["Jump"].play();
+    actions["Jump"].timeScale = animationSpeed;
+  } else if (!isJumping && actions["Jump"].isRunning()) {
+    actions["Jump"].stop();
+  }
     }
   }, [
     actions,
+    punch,
     moveForward,
     moveBackward,
     moveLeft,
     moveRight,
     isJumping,
-    moveForwardLeft,
   ]);
   useEffect(() => {
     const handleKeyDown = (event) => {
-      switch (event.key.toLowerCase()) {
+      const key = event.key.toLowerCase();
+      switch (key) {
         case "w":
         case "ц":
           setMoveForward(true);
@@ -96,13 +99,18 @@ const Model = ({ url }) => {
             setJumpVelocity(jumpHeight);
           }
           break;
+          case "r":
+            case "к":
+              setPunch(true);
+              break;
         default:
-          break;
+        break;
       }
     };
 
     const handleKeyUp = (event) => {
-      switch (event.key.toLowerCase()) {
+      const key = event.key.toLowerCase();
+      switch (key) {
         case "w":
         case "ц":
           setMoveForward(false);
@@ -119,6 +127,10 @@ const Model = ({ url }) => {
         case "в":
           setMoveRight(false);
           break;
+        case "r":
+        case "к":
+          setPunch(false);
+          break;
         default:
           break;
       }
@@ -131,80 +143,65 @@ const Model = ({ url }) => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [isJumping]);
+  }, []);
 
   useFrame(() => {
-    if (!modelRef.current) return;
-
     const model = modelRef.current;
+  if (!model) return;
 
+    
     const currentPosition = model.position.clone();
 
-    let newPosition = [model.position.x, model.position.y, model.position.z];
-
     if (moveForward && moveLeft) {
-      model.position.z += speed; // Diagonal forward-left (reversed)
-      model.position.x += speed;
       scene.rotation.y = Math.PI / 4;
       currentPosition.z += speed;
       currentPosition.x += speed;
     } else if (moveForward && moveRight) {
-      model.position.z += speed; // Diagonal forward-right (reversed)
-      model.position.x -= speed;
       scene.rotation.y = (Math.PI * 7) / 4;
       currentPosition.z += speed;
       currentPosition.x -= speed;
     } else if (moveBackward && moveLeft) {
-      model.position.z -= speed; // Diagonal backward-left (reversed)
-      model.position.x += speed;
       scene.rotation.y = (Math.PI * 3) / 4;
       currentPosition.z -= speed;
       currentPosition.x += speed;
     } else if (moveBackward && moveRight) {
-      model.position.z -= speed; // Diagonal backward-right (reversed)
-      model.position.x -= speed;
       scene.rotation.y = (Math.PI * 5) / 4;
       currentPosition.z -= speed;
       currentPosition.x -= speed;
     } else if (moveBackward) {
-      model.position.z -= speed; // Move backward (reversed to forward)
       scene.rotation.y = Math.PI;
-      newPosition[2] -= speed;
-      currentPosition.z -= speed;
+      currentPosition.z -= speed; 
     } else if (moveForward) {
-      model.position.z += speed; // Move forward (reversed to backward)
       scene.rotation.y = Math.PI * 2;
-      newPosition[2] += speed;
-      currentPosition.z += speed;
+      currentPosition.z += speed; 
     } else if (moveRight) {
-      model.position.x -= speed; // Move right (reversed to left)
       scene.rotation.y = (Math.PI * 3) / 2;
-      newPosition[0] -= speed;
       currentPosition.x -= speed;
     } else if (moveLeft) {
-      model.position.x += speed; // Move left (reversed to right)
+      currentPosition.x  += speed; 
       scene.rotation.y = Math.PI / 2;
-      currentPosition.x += speed;
-      newPosition[0] += speed;
     }
 
-    model.position.copy(currentPosition);
-    api.position.set(currentPosition.x, jumpVelocity, currentPosition.z);
     if (isJumping) {
-      model.position.y += jumpVelocity;
+      currentPosition.y += jumpVelocity;
       setJumpVelocity((prev) => prev + gravity);
-      if (model.position.y <= 0) {
-        model.position.y = 0;
+      if (currentPosition.y <= 0) {
+        currentPosition.y = 0;
         setIsJumping(false);
         setJumpVelocity(0);
       }
     }
+
+    if (!modelRef.current) return;
+
+    api.position.set(currentPosition.x, currentPosition.y, currentPosition.z);
+    modelRef.current.position.copy(currentPosition);
   });
 
   return (
     <mesh ref={ref}>
       <CameraController modelRef={modelRef} addZ={addZ} addX={addX} />
-      <primitive ref={modelRef} object={scene} scale={1.5} />
+      <primitive ref={modelRef} object={scene}  scale={1.5}/>
     </mesh>
   );
 };

@@ -5,9 +5,9 @@ const Box = () => {
   const [hovered, setHovered] = useState(false);
 
   const [ref] = useBox(() => ({
-    mass: 1,
-    position: [7, 7, 7],
-    args: [7, 7, 7],
+    mass: 0 ,
+    position: [5, 5, 5],
+    args: [5, 5, 5],
   }));
   return (
     <mesh
@@ -15,7 +15,7 @@ const Box = () => {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      <boxGeometry args={[7, 7, 7]} />
+      <boxGeometry args={[5, 5, 5]} />
       <meshStandardMaterial color="green" />
       {hovered && <Edges threshold={1} scale={1.05} color="white" />}
     </mesh>
