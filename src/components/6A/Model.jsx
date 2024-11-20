@@ -1,82 +1,80 @@
-import { useGLTF } from "@react-three/drei";
-import { useRef ,useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useGLTF, useAnimations } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useAnimations } from "@react-three/drei";
-import { useBox, usePlane } from "@react-three/cannon";
 import CameraController from "./CameraController";
 import { useControls } from "leva";
 
 const Model = ({ url }) => {
-  const modelRef = useRef();
-  const { scene, animations } = useGLTF(url);
-  const { actions } = useAnimations(animations, modelRef);
-  const [addZ, setAddZ] = useState(25);
-  const [addX, setAddX] = useState(0);
-
-  const [ref, api] = useBox(() => ({
-    mass: 2,
-    position: [0, 0, 0],
-    args: [2, 5, 2],
-    material: {
-      friction: 1,
-      restitution: 0.1,
-    },
-    onCollide: (e) => {
-      console.log("Collision detected with:", e.body);
-    },
-  }));
+  // LEVA SETPARAMETERS
   const { speed, jumpHeight, gravity } = useControls({
     speed: { value: 0.15, min: 0, max: 15 },
     jumpHeight: { value: 0.9, min: 0, max: 100 },
     gravity: { value: -0.041, min: -1, max: 1 },
   });
-  const animationSpeed = 0.5;
 
+  // ACTIONS
   const [moveForward, setMoveForward] = useState(false);
   const [moveBackward, setMoveBackward] = useState(false);
   const [moveLeft, setMoveLeft] = useState(false);
   const [moveRight, setMoveRight] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
-  const [punch, setPunch] = useState(false);
+  const [isDancing, setIsDancing] = useState(false);
+  const [isPuching, setIsPunching] = useState(false);
+  const [isWaving, setIsWaving] = useState(false);
+
+  // PARAMETERS
   const [jumpVelocity, setJumpVelocity] = useState(0);
+  const modelRef = useRef();
+  const { scene, animations } = useGLTF(url);
+  const { actions } = useAnimations(animations, modelRef);
+  const [addZ] = useState(25);
+  const [addX] = useState(0);
+  const animationSpeed = 0.5;
 
-
+  // FUNCTIONS
   useEffect(() => {
     if (actions) {
-      if (!actions) return;
-
-  if (punch && !actions["Punch"].isRunning()) {
-    actions["Punch"].play();
-  } else if (!punch && actions["Punch"].isRunning()) {
-    actions["Punch"].stop();
-  }
-
-  if ((moveForward || moveBackward || moveLeft || moveRight) && !actions["Running"].isRunning()) {
-    actions["Running"].play();
-  } else if (!(moveForward || moveBackward || moveLeft || moveRight) && actions["Running"].isRunning()) {
-    actions["Running"].stop();
-  }
-
-  if (isJumping && !actions["Jump"].isRunning()) {
-    actions["Jump"].play();
-    actions["Jump"].timeScale = animationSpeed;
-  } else if (!isJumping && actions["Jump"].isRunning()) {
-    actions["Jump"].stop();
-  }
+      if (moveForward || moveBackward || moveLeft || moveRight) {
+        actions["Running"].play();
+      } else {
+        actions["Running"].stop();
+      }
+      if (isJumping) {
+        actions["Jump"].play();
+        actions["Jump"].timeScale = animationSpeed;
+      } else {
+        actions["Jump"].stop();
+      }
+      if (isDancing) {
+        actions["Dance"].play();
+      } else {
+        actions["Dance"].stop();
+      }
+      if (isPuching) {
+        actions["Punch"].play();
+      } else {
+        actions["Punch"].stop();
+      }
+      if (isWaving) {
+        actions["Wave"].play();
+      } else {
+        actions["Wave"].stop();
+      }
     }
   }, [
     actions,
-    punch,
     moveForward,
     moveBackward,
     moveLeft,
     moveRight,
     isJumping,
+    isDancing,
+    isPuching,
+    isWaving,
   ]);
   useEffect(() => {
     const handleKeyDown = (event) => {
-      const key = event.key.toLowerCase();
-      switch (key) {
+      switch (event.key.toLowerCase()) {
         case "w":
         case "ц":
           setMoveForward(true);
@@ -99,18 +97,31 @@ const Model = ({ url }) => {
             setJumpVelocity(jumpHeight);
           }
           break;
-          case "r":
-            case "к":
-              setPunch(true);
-              break;
+        case "r":
+        case "к":
+          if (!isPuching) {
+            setIsPunching(true);
+          }
+          break;
+        case "t":
+        case "е":
+          if (!isDancing) {
+            setIsDancing(true);
+          }
+          break;
+        case "y":
+        case "н":
+          if (!isWaving) {
+            setIsWaving(true);
+          }
+          break;
         default:
-        break;
+          break;
       }
     };
 
     const handleKeyUp = (event) => {
-      const key = event.key.toLowerCase();
-      switch (key) {
+      switch (event.key.toLowerCase()) {
         case "w":
         case "ц":
           setMoveForward(false);
@@ -129,7 +140,15 @@ const Model = ({ url }) => {
           break;
         case "r":
         case "к":
-          setPunch(false);
+          setIsPunching(false);
+          break;
+        case "t":
+        case "е":
+          setIsDancing(false);
+          break;
+        case "y":
+        case "н":
+          setIsWaving(false);
           break;
         default:
           break;
@@ -143,66 +162,60 @@ const Model = ({ url }) => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [isJumping, isDancing, isWaving, isPuching]);
 
   useFrame(() => {
-    const model = modelRef.current;
-  if (!model) return;
+    if (!modelRef.current) return;
 
-    
-    const currentPosition = model.position.clone();
+    const model = modelRef.current;
+    const movementSpeed = (speed * Math.sqrt(2)) / 2; // Adjust for diagonal speed normalization
 
     if (moveForward && moveLeft) {
+      model.position.z += movementSpeed; // Diagonal forward-left (reversed)
+      model.position.x += movementSpeed;
       scene.rotation.y = Math.PI / 4;
-      currentPosition.z += speed;
-      currentPosition.x += speed;
     } else if (moveForward && moveRight) {
+      model.position.z += movementSpeed; // Diagonal forward-right (reversed)
+      model.position.x -= movementSpeed;
       scene.rotation.y = (Math.PI * 7) / 4;
-      currentPosition.z += speed;
-      currentPosition.x -= speed;
     } else if (moveBackward && moveLeft) {
+      model.position.z -= movementSpeed; // Diagonal backward-left (reversed)
+      model.position.x += movementSpeed;
       scene.rotation.y = (Math.PI * 3) / 4;
-      currentPosition.z -= speed;
-      currentPosition.x += speed;
     } else if (moveBackward && moveRight) {
+      model.position.z -= movementSpeed; // Diagonal backward-right (reversed)
+      model.position.x -= movementSpeed;
       scene.rotation.y = (Math.PI * 5) / 4;
-      currentPosition.z -= speed;
-      currentPosition.x -= speed;
     } else if (moveBackward) {
+      model.position.z -= speed; // Move backward (reversed to forward)
       scene.rotation.y = Math.PI;
-      currentPosition.z -= speed; 
     } else if (moveForward) {
+      model.position.z += speed; // Move forward (reversed to backward)
       scene.rotation.y = Math.PI * 2;
-      currentPosition.z += speed; 
     } else if (moveRight) {
+      model.position.x -= speed; // Move right (reversed to left)
       scene.rotation.y = (Math.PI * 3) / 2;
-      currentPosition.x -= speed;
     } else if (moveLeft) {
-      currentPosition.x  += speed; 
+      model.position.x += speed; // Move left (reversed to right)
       scene.rotation.y = Math.PI / 2;
     }
 
     if (isJumping) {
-      currentPosition.y += jumpVelocity;
+      model.position.y += jumpVelocity;
       setJumpVelocity((prev) => prev + gravity);
-      if (currentPosition.y <= 0) {
-        currentPosition.y = 0;
+      if (model.position.y <= 0) {
+        model.position.y = 0;
         setIsJumping(false);
         setJumpVelocity(0);
       }
     }
-
-    if (!modelRef.current) return;
-
-    api.position.set(currentPosition.x, currentPosition.y, currentPosition.z);
-    modelRef.current.position.copy(currentPosition);
   });
 
   return (
-    <mesh ref={ref}>
+    <>
       <CameraController modelRef={modelRef} addZ={addZ} addX={addX} />
-      <primitive ref={modelRef} object={scene}  scale={1.5}/>
-    </mesh>
+      <primitive ref={modelRef} object={scene} scale={1.5} />
+    </>
   );
 };
 
