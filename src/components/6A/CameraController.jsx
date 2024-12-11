@@ -19,10 +19,10 @@ const CameraController = ({ modelRef, addZ, addX }) => {
         case "ArrowDown":
           setY((y) => y - 1);
           break;
-        case "ArrowLeft":
+        case "ArrowRight":
           setX((x) => x + 1);
           break;
-        case "ArrowRight":
+        case "ArrowLeft":
           setX((x) => x - 1);
           break;
         case "c":
@@ -50,6 +50,7 @@ const CameraController = ({ modelRef, addZ, addX }) => {
       const robotPosition = modelRef.current.position;
 
       if (cameraFollow.current) {
+        
         // Камера будет следовать за роботом, удерживая определённый угол и расстояние
         camera.position.lerp(
           new Vector3(

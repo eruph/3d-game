@@ -1,10 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 import CameraController from "./CameraController";
 import { useControls } from "leva";
-
-const Model = ({ url }) => {
+const Model = ({ url, boxes }) => {
   // LEVA SETPARAMETERS
   const { speed, jumpHeight, gravity } = useControls({
     speed: { value: 0.15, min: 0, max: 15 },
@@ -25,6 +25,7 @@ const Model = ({ url }) => {
   // PARAMETERS
   const [jumpVelocity, setJumpVelocity] = useState(0);
   const modelRef = useRef();
+  const raycaster = useRef(new THREE.Raycaster());
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, modelRef);
   const [addZ] = useState(25);
@@ -34,7 +35,7 @@ const Model = ({ url }) => {
   // FUNCTIONS
   useEffect(() => {
     if (actions) {
-      if (moveForward || moveBackward || moveLeft || moveRight) {
+      if (moveForward || moveBackward ) {
         actions["Running"].play();
       } else {
         actions["Running"].stop();
@@ -166,43 +167,66 @@ const Model = ({ url }) => {
 
   useFrame(() => {
     if (!modelRef.current) return;
-
+  
     const model = modelRef.current;
-    const movementSpeed = (speed * Math.sqrt(2)) / 2; // Adjust for diagonal speed normalization
-
-    if (moveForward && moveLeft) {
-      model.position.z += movementSpeed; // Diagonal forward-left (reversed)
-      model.position.x += movementSpeed;
-      scene.rotation.y = Math.PI / 4;
-    } else if (moveForward && moveRight) {
-      model.position.z += movementSpeed; // Diagonal forward-right (reversed)
-      model.position.x -= movementSpeed;
-      scene.rotation.y = (Math.PI * 7) / 4;
-    } else if (moveBackward && moveLeft) {
-      model.position.z -= movementSpeed; // Diagonal backward-left (reversed)
-      model.position.x += movementSpeed;
-      scene.rotation.y = (Math.PI * 3) / 4;
-    } else if (moveBackward && moveRight) {
-      model.position.z -= movementSpeed; // Diagonal backward-right (reversed)
-      model.position.x -= movementSpeed;
-      scene.rotation.y = (Math.PI * 5) / 4;
-    } else if (moveBackward) {
-      model.position.z -= speed; // Move backward (reversed to forward)
-      scene.rotation.y = Math.PI;
-    } else if (moveForward) {
-      model.position.z += speed; // Move forward (reversed to backward)
-      scene.rotation.y = Math.PI * 2;
-    } else if (moveRight) {
-      model.position.x -= speed; // Move right (reversed to left)
-      scene.rotation.y = (Math.PI * 3) / 2;
-    } else if (moveLeft) {
-      model.position.x += speed; // Move left (reversed to right)
-      scene.rotation.y = Math.PI / 2;
+  
+    // Получение границ модели
+    const boundingBox = new THREE.Box3().setFromObject(model);
+  
+    // Смещения для запуска лучей
+    const offsets = [
+      new THREE.Vector3(0, 0, -1), // Вперед
+      new THREE.Vector3(0, 0, 1),  // Назад
+      new THREE.Vector3(-1, 0, 0), // Влево
+      new THREE.Vector3(1, 0, 0),  // Вправо
+    ];
+  
+    let collisionDetected = false;
+  
+    for (const offset of offsets) {
+      const rayOrigin = new THREE.Vector3()
+        .copy(model.position)
+        .add(offset.multiplyScalar(2)); // Учитываем смещение от центра
+  
+      raycaster.current.set(rayOrigin, offset.normalize());
+  
+      const intersects = raycaster.current.intersectObjects(boxes, true);
+  
+      if (intersects.length > 0 && intersects[0].distance < 1) {
+        collisionDetected = true;
+        break;
+      }
     }
-
+  
+    // Движение блокируется, если есть столкновение
+    if (!collisionDetected) {
+      if (moveForward) {
+        const deltaX = Math.sin(model.rotation.y) * speed;
+        const deltaZ = Math.cos(model.rotation.y) * speed;
+        model.position.z += deltaZ;
+        model.position.x += deltaX;
+      }
+      if (moveBackward) {
+        const deltaX = Math.sin(model.rotation.y) * speed;
+        const deltaZ = Math.cos(model.rotation.y) * speed;
+        model.position.z -= deltaZ;
+        model.position.x -= deltaX;
+      }
+    }
+  
+    // Ротация
+    if (moveLeft) {
+      model.rotation.y += 0.02;
+    }
+    if (moveRight) {
+      model.rotation.y -= 0.02;
+    }
+  
+    // Прыжки
     if (isJumping) {
       model.position.y += jumpVelocity;
       setJumpVelocity((prev) => prev + gravity);
+  
       if (model.position.y <= 0) {
         model.position.y = 0;
         setIsJumping(false);
@@ -210,10 +234,10 @@ const Model = ({ url }) => {
       }
     }
   });
-
+  
   return (
     <>
-      <CameraController modelRef={modelRef} addZ={addZ} addX={addX} />
+      <CameraController modelRef={modelRef} addZ={addZ} addX={addX}  />
       <primitive ref={modelRef} object={scene} scale={1.5} />
     </>
   );
